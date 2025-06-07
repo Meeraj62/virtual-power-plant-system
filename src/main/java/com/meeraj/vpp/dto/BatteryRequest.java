@@ -19,7 +19,6 @@ public class BatteryRequest {
     @NotBlank
     private String postcode;
 
-    @NotBlank
     @Positive
-    private Integer wattCapacity;
+    private Integer capacity;
 }

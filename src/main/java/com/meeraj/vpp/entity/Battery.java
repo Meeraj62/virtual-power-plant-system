@@ -27,7 +27,6 @@ public class Battery {
     private String postcode;
 
     @Positive
-    @NotBlank
     private Integer wattCapacity;
 
     public Battery(String name, String postcode, Integer wattCapacity) {

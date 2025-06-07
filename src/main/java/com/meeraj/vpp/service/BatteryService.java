@@ -9,7 +9,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.stream.Stream;
 
 @Service
 @Slf4j
@@ -22,7 +21,7 @@ public class BatteryService {
         log.info("Starting registering {} batteries", batteryRequests.size());
 
         List<Battery> batteries = batteryRequests.stream()
-                .map(battery -> new Battery(battery.getName(), battery.getPostcode(), battery.getWattCapacity()))
+                .map(battery -> new Battery(battery.getName(), battery.getPostcode(), battery.getCapacity()))
                 .toList();
 
         List<Battery> savedBatteries = batteryRepository.saveAll(batteries);
@@ -62,21 +61,5 @@ public class BatteryService {
         log.info("Found {} batteries with total capacity {} watts", batteries.size(), totalWattCapacity);
 
         return new BatterySearchResponse(batteryNames, stats);
-    }
-
-    private static List<Battery> getBatteries(Integer minWattCapacity, Integer maxWattCapacity, List<Battery> batteries) {
-        Stream<Battery> batteryStream = batteries.stream();
-
-        // if min watt is sent
-        if (minWattCapacity != null) {
-            batteryStream = batteryStream.filter(battery -> battery.getWattCapacity() >= minWattCapacity);
-        }
-
-        // if max watt is sent in the request
-        if (maxWattCapacity != null) {
-            batteryStream = batteryStream.filter(battery -> battery.getWattCapacity() >= maxWattCapacity);
-        }
-
-        return batteryStream.toList();
     }
 }
