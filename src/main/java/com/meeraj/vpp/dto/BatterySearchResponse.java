@@ -20,7 +20,7 @@ public class BatterySearchResponse {
     @Setter
     @NoArgsConstructor
     @AllArgsConstructor
-    private static class BatteryStatistics {
+    public static class BatteryStatistics {
         private int totalWattCapacity;
         private Double averageWattCapacity;
     }

@@ -29,4 +29,10 @@ public class Battery {
     @Positive
     @NotBlank
     private Integer wattCapacity;
+
+    public Battery(String name, String postcode, Integer wattCapacity) {
+        this.name = name;
+        this.postcode = postcode;
+        this.wattCapacity = wattCapacity;
+    }
 }
