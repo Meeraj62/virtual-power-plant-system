@@ -9,6 +9,10 @@ import java.util.List;
 
 public interface BatteryRepository extends JpaRepository<Battery, Long> {
 
-    @Query("SELECT b FROM Battery WHERE b.postcode BETWEEN :startCode AND :endCode")
-    List<Battery> findByPostcodeRange(@Param("startCode") String startCode, @Param("endCode") String endCode);
+    @Query("SELECT b FROM Battery b WHERE b.postcode BETWEEN :startCode AND :endCode" +
+            " AND (:minWattCapacity is NULL OR b.wattCapacity >= :minWattCapacity) " +
+            " AND (:maxWattCapacity is NULL OR b.wattCapacity <= :maxWattCapacity) " +
+            " ORDER BY b.name"
+    )
+    List<Battery> findByPostcodeRange(@Param("startCode") String startCode, @Param("endCode") String endCode, @Param("minWattCapacity") Integer minWattCapacity, @Param("maxWattCapacity") Integer maxWattCapacity);
 }

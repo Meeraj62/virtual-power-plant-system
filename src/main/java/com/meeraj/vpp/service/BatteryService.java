@@ -33,14 +33,38 @@ public class BatteryService {
     }
 
     public BatterySearchResponse getBatteriesByPostcodeRange(String startCode, String endCode, Integer minWattCapacity, Integer maxWattCapacity) {
-        log.info("Searching batteries within postcode range {} to {}", startCode, endCode);
+        log.info("Searching batteries within postcode range {} to {} with filters min={}, max={}",
+                startCode, endCode, minWattCapacity, maxWattCapacity);
 
-        List<Battery> batteries = batteryRepository.findByPostcodeRange(startCode, endCode);
+        List<Battery> batteries = batteryRepository.findByPostcodeRange(startCode, endCode, minWattCapacity, maxWattCapacity);
 
         if (batteries.isEmpty()) {
             return new BatterySearchResponse(List.of(), new BatterySearchResponse.BatteryStatistics(0, 0.0));
         }
 
+        List<String> batteryNames = batteries.stream()
+                .map(Battery::getName)
+                .sorted()
+                .toList();
+
+        int totalWattCapacity = batteries.stream()
+                .mapToInt(Battery::getWattCapacity)
+                .sum();
+
+        double averageWattCapacity = batteries.stream()
+                .mapToInt(Battery::getWattCapacity)
+                .average()
+                .orElse(0.0);
+
+        BatterySearchResponse.BatteryStatistics stats =
+                new BatterySearchResponse.BatteryStatistics(totalWattCapacity, averageWattCapacity);
+
+        log.info("Found {} batteries with total capacity {} watts", batteries.size(), totalWattCapacity);
+
+        return new BatterySearchResponse(batteryNames, stats);
+    }
+
+    private static List<Battery> getBatteries(Integer minWattCapacity, Integer maxWattCapacity, List<Battery> batteries) {
         Stream<Battery> batteryStream = batteries.stream();
 
         // if min watt is sent
@@ -53,26 +77,6 @@ public class BatteryService {
             batteryStream = batteryStream.filter(battery -> battery.getWattCapacity() >= maxWattCapacity);
         }
 
-        List<Battery> filteredBatteries = batteryStream.toList();
-
-        List<String> sortedNames = filteredBatteries.stream()
-                .map(Battery::getName)
-                .sorted()
-                .toList();
-
-        int totalWattCapacity = filteredBatteries.stream()
-                .mapToInt(Battery::getWattCapacity)
-                .sum();
-
-        double averageWattCapacity = filteredBatteries.stream()
-                .mapToInt(Battery::getWattCapacity)
-                .average()
-                .orElse(0.0);
-
-        BatterySearchResponse.BatteryStatistics stats = new BatterySearchResponse.BatteryStatistics(totalWattCapacity, averageWattCapacity);
-
-        log.info("Found {} batteries with total capacity {} watts", batteries.size(), totalWattCapacity);
-
-        return new BatterySearchResponse(sortedNames, stats);
+        return batteryStream.toList();
     }
 }
